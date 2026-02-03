@@ -1,6 +1,6 @@
 package com.carlos.trello.services;
 
-import com.carlos.trello.User;
+import com.carlos.trello.persistence.model.User;
 import com.carlos.trello.persistence.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;

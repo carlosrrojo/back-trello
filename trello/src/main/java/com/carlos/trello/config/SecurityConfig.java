@@ -33,18 +33,27 @@ public class SecurityConfig {
                 // store token in the session 
                 .csrfTokenRequestHandler(new XorCsrfTokenRequestAttributeHandler()));
         http
-            .formLogin(null)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint));
-
+        http.formLogin(login -> login
+            .loginPage("/auth/login")
+            .usernameParameter("username")
+            .passwordParameter("password")
+            .defaultSuccessUrl("/home", true)
+            .failureUrl("/auth/login?error=true"));
+        http.logout(logout -> logout
+            .logoutUrl("/auth/logout")
+            .logoutSuccessUrl("/auth/login?logout=true"));
+            //.deleteCookies("JSESSIONID")
+            //.invalidateHttpSession(true));
         /*.and()
             .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
             .and()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) */
-        //http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

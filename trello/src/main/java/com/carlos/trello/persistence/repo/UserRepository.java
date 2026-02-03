@@ -1,6 +1,6 @@
 package com.carlos.trello.persistence.repo;
 
-import com.carlos.trello.User;
+import com.carlos.trello.persistence.model.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

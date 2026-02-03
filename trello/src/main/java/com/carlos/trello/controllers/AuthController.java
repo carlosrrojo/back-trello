@@ -1,6 +1,6 @@
 package com.carlos.trello.controllers;
 
-import com.carlos.trello.User;
+import com.carlos.trello.persistence.model.User;
 import com.carlos.trello.persistence.repo.UserRepository;
 import com.carlos.trello.services.AuthService;
 import com.carlos.trello.config.JwtUtil;
