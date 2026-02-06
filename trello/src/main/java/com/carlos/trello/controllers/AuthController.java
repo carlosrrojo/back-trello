@@ -1,26 +1,26 @@
 package com.carlos.trello.controllers;
 
-import com.carlos.trello.persistence.model.User;
-import com.carlos.trello.persistence.repo.UserRepository;
 import com.carlos.trello.services.AuthService;
+import com.carlos.trello.bean.RegisterRequest;
 import com.carlos.trello.bean.UserDTO;
 import com.carlos.trello.config.JwtUtil;
 import com.carlos.trello.mapper.UserMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.HashMap;
 import java.util.Map;
+import jakarta.validation.Valid;
+
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:4200")
 public class AuthController {
     @Autowired
     private AuthService authService;
-    @Autowired
-    private UserRepository userRepository;
     @Autowired
     private JwtUtil jwtUtil;
     @Autowired
@@ -51,20 +51,12 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserDTO userDTO, @RequestParam String password) {
-        String username = userDTO.getUsername();
-        
-        if (authService.getUserByUsername(username) != null) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Username already exists");
-            return ResponseEntity.status(400).body(response);
-        }
-        
-        User user = userMapper.toEntity(userDTO);
-        user.setPassword(passwordEncoder.encode(password));
-        userRepository.save(user);
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request, PasswordEncoder passwordEncoder) {
+        request.setPassword(passwordEncoder.encode(request.getPassword()));
+        UserDTO savedUser = authService.saveUser(request);
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Registration successful");
+        response.put("user", savedUser);
         return ResponseEntity.ok(response);
     }
 }

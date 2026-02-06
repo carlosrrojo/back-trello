@@ -1,4 +1,4 @@
-package com.carlos.trello.security;
+package com.carlos.trello.config;
 
 public class UserDetailsServiceImpl {
     

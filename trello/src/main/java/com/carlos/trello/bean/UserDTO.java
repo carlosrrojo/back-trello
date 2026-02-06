@@ -1,13 +1,13 @@
 package com.carlos.trello.bean;
 
-import com.carlos.trello.persistence.model.User;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * DTO wrapper for User entity. Does not expose password.
  */
 public class UserDTO {
-
     private String id;
+    @NotBlank(message = "Username is mandatory")
     private String username;
 
     public UserDTO() {

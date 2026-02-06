@@ -1,9 +1,11 @@
 // src/test/java/com/carlos/trello/controllers/AuthControllerTest.java
 package com.carlos.trello.controllers;
 
-import com.carlos.trello.persistence.model.User;
+import com.carlos.trello.persistence.model.CustomUser;
 import com.carlos.trello.persistence.repo.UserRepository;
 import com.carlos.trello.services.AuthService;
+import com.carlos.trello.bean.RegisterRequest;
+import com.carlos.trello.bean.UserDTO;
 import com.carlos.trello.config.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -106,7 +108,7 @@ class AuthControllerTest {
 
         when(authService.getUserByUsername(eq(username))).thenReturn(null);
         when(passwordEncoder.encode(eq(password))).thenReturn(encoded);
-        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(userRepository.save(any(CustomUser.class))).thenAnswer(i -> i.getArgument(0));
 
         Map<String, String> body = new HashMap<>();
         body.put("username", username);
@@ -118,30 +120,24 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message", is("Registration successful")));
 
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        ArgumentCaptor<CustomUser> userCaptor = ArgumentCaptor.forClass(CustomUser.class);
         verify(userRepository, times(1)).save(userCaptor.capture());
-        User saved = userCaptor.getValue();
+        CustomUser saved = userCaptor.getValue();
         assertEquals(username, saved.getUsername());
         assertEquals(encoded, saved.getPassword());
     }
 
     @Test
     void registerUsernameExists_returnsBadRequestAndMessage() throws Exception {
-        String username = "existing";
-        String password = "any";
+        RegisterRequest request = new RegisterRequest();
+        request.setUsername("existing");
+        request.setPassword("pass");
 
-        User existing = new User();
-        existing.setUsername(username);
-
-        when(authService.getUserByUsername(eq(username))).thenReturn(existing);
-
-        Map<String, String> body = new HashMap<>();
-        body.put("username", username);
-        body.put("password", password);
+        when(authService.saveUser(eq(request))).thenReturn(new UserDTO("", request.getUsername()));
 
         mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(body)))
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is("Username already exists")));
 

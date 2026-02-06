@@ -5,15 +5,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 //import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
 @Configuration
@@ -21,47 +24,54 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 public class SecurityConfig {
     @Autowired
     private JwtRequestFilter jwtRequestFilter;
-
     @Autowired
     private AuthenticationEntryPoint authenticationEntryPoint;
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors(cors -> cors.disable());
-        http.csrf(csrf -> csrf.disable());
-        /*http
-            .csrf(csrf ->  csrf.csrfTokenRepository(
-                new HttpSessionCsrfTokenRepository())     
-                // store token in the session 
-                .csrfTokenRequestHandler(new XorCsrfTokenRequestAttributeHandler()));
-                */
-        http
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
-                .anyRequest().authenticated()
-            )
-            .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint));
-        http.formLogin(login -> login
-            .loginPage("/auth/login")
-            .usernameParameter("username")
-            .passwordParameter("password")
-            .defaultSuccessUrl("/home", true)
-            .failureUrl("/auth/login?error=true"));
-        http.logout(logout -> logout
-            .logoutUrl("/auth/logout")
-            .logoutSuccessUrl("/auth/login?logout=true"));
-            //.deleteCookies("JSESSIONID")
-            //.invalidateHttpSession(true));
-        /*.and()
-            .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
-            .and()
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) */
-        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-        return http.build();
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        //http.cors(cors -> cors.disable());
+        //http.csrf(csrf -> csrf.disable());
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf.disable())
+            .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
+            .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers(HttpMethod.POST,"/api/auth/login", "/api/auth/register").permitAll()
+                .anyRequest().authenticated())
+            .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+        /*http.formLogin(login -> login
+            .loginPage("/auth/login")
+            .usernameParameter("username")
+            .passwordParameter("password")
+            .defaultSuccessUrl("/dashboard", true)
+            .failureUrl("/auth/login?error=true"));*/
+        /*http.logout(logout -> logout
+            .logoutUrl("/auth/logout")
+            .logoutSuccessUrl("/auth/login?logout=true"));
+            //.deleteCookies("JSESSIONID")
+            //.invalidateHttpSession(true));
+        .and()
+            .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
+            .and()
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) */
+        return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("http://localhost:4200");
+        configuration.addAllowedMethod("*");
+        configuration.addAllowedHeader("*");
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+
+    }
+
 }

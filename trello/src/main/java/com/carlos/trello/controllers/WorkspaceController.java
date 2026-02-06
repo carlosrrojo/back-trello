@@ -15,10 +15,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import com.carlos.trello.bean.WorkspaceDTO;
+import com.carlos.trello.config.UserDetailsImpl;
 import com.carlos.trello.mapper.WorkspaceMapper;
 import com.carlos.trello.persistence.model.Workspace;
 import com.carlos.trello.services.WorkspaceService;
-import com.carlos.trello.security.UserDetailsImpl;
 
 @RestController
 @RequestMapping("/api/workspaces")
