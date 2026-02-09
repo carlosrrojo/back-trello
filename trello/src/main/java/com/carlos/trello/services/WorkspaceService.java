@@ -1,6 +1,7 @@
 package com.carlos.trello.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.carlos.trello.persistence.repo.UserRepository;
 import com.carlos.trello.persistence.repo.WorkspaceRepository;
@@ -8,6 +9,7 @@ import com.carlos.trello.persistence.model.Workspace;
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class WorkspaceService {
     @Autowired
     WorkspaceRepository workspaceRepository;

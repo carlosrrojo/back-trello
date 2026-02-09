@@ -1,6 +1,5 @@
 package com.carlos.trello.config;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -21,9 +20,6 @@ public class JwtUtil {
     private String jwtSecret;
     @Value("${jwt.expiration}")
     private int jwtExpirationInMs;
-
-    //private static final String SECRET_KEY = "your_secret_key_here";
-    //private final long EXPIRATION_TIME = 86400000; // 1 day in ms
 
     private SecretKey key;
 

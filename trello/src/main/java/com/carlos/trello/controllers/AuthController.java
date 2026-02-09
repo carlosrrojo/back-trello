@@ -3,16 +3,11 @@ package com.carlos.trello.controllers;
 import com.carlos.trello.services.AuthService;
 import com.carlos.trello.bean.RegisterRequest;
 import com.carlos.trello.bean.LoginRequest;
-import com.carlos.trello.persistence.model.CustomUser;
 import com.carlos.trello.bean.UserDTO;
-import com.carlos.trello.config.JwtUtil;
-import com.carlos.trello.mapper.UserMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.core.userdetails.User;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,12 +18,10 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/auth")
 public class AuthController {
     private AuthService authService;
-    private JwtUtil jwtUtil;
 
     @Autowired
-    public AuthController(AuthService authService, JwtUtil jwtUtil) {
+    public AuthController(AuthService authService) {
         this.authService = authService;
-        this.jwtUtil = jwtUtil;
     } 
 
     @PostMapping("/login")
