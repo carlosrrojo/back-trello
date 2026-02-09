@@ -4,6 +4,7 @@ package com.carlos.trello.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -12,20 +13,31 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
-import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 
 @Configuration
-@EnableWebSecurity
 public class SecurityConfig {
     @Autowired
     private JwtRequestFilter jwtRequestFilter;
     @Autowired
-    private AuthenticationEntryPoint authenticationEntryPoint;
+    private JwtAuthenticationEntryPoint authenticationEntryPoint;
+
+    @Bean
+    public JwtRequestFilter authTokenFilter() {
+        return new JwtRequestFilter();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(
+        AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
+    }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -38,9 +50,10 @@ public class SecurityConfig {
         //http.csrf(csrf -> csrf.disable());
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
-            .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
+            //.exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(HttpMethod.POST,"/api/auth/login", "/api/auth/register").permitAll()
+                .requestMatchers(HttpMethod.POST,"/api/auth/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                 .anyRequest().authenticated())
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         /*http.formLogin(login -> login
@@ -71,7 +84,6 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
-
     }
 
 }
