@@ -32,10 +32,12 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthenticationEntryPoint authenticationEntryPoint;
 
-    @Bean
+    @Autowired
+    private JwtRequestFilter jwtRequestFilter;
+    /*@Bean
     public JwtRequestFilter authTokenFilter() {
         return new JwtRequestFilter();
-    }
+    }*/
 
     @Bean
     public AuthenticationManager authenticationManager(
@@ -63,7 +65,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST,"/api/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                 .anyRequest().authenticated())
-            .addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
             .cors(Customizer.withDefaults());
 
         return http.build();

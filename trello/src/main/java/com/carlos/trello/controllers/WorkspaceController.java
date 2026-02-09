@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.carlos.trello.bean.WorkspaceDTO;
-import com.carlos.trello.config.UserDetailsImpl;
 import com.carlos.trello.mapper.WorkspaceMapper;
 import com.carlos.trello.persistence.model.Workspace;
 import com.carlos.trello.services.WorkspaceService;
@@ -30,16 +30,16 @@ public class WorkspaceController {
     private WorkspaceMapper workspaceMapper;
 
     @GetMapping
-    public List<WorkspaceDTO> getMyWorkspaces(@AuthenticationPrincipal UserDetailsImpl userDetails){
-        return workspaceService.getWorkspacesByUserId(userDetails.getId())
+    public List<WorkspaceDTO> getMyWorkspaces(@AuthenticationPrincipal UserDetails userDetails){
+        return workspaceService.getWorkspacesByUserId(userDetails.getUsername())
         .stream()
         .map(workspaceMapper::toDTO)
         .toList();
     }
 
     @PostMapping
-    public WorkspaceDTO createWorkspace(@RequestBody WorkspaceDTO workspaceDTO,@AuthenticationPrincipal UserDetailsImpl userDetails){
-        Workspace workspace = workspaceService.createWorkspace(workspaceDTO.getName(), workspaceDTO.getDescription(),userDetails.getId());
+    public WorkspaceDTO createWorkspace(@RequestBody WorkspaceDTO workspaceDTO,@AuthenticationPrincipal UserDetails userDetails){
+        Workspace workspace = workspaceService.createWorkspace(workspaceDTO.getName(), workspaceDTO.getDescription(),userDetails.getUsername());
         return workspaceMapper.toDTO(workspace);
     }
 
